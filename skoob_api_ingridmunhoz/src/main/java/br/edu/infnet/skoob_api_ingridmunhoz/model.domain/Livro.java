@@ -1,5 +1,7 @@
 package br.edu.infnet.skoob_api_ingridmunhoz.model.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,9 +19,14 @@ public class Livro {
     private boolean disponivel;
     private String sinopse;
 
+    // Tambem é possivel utilizar o @JsonManagedReference para evitar o loop
+    // mas optei pelo json ignore
     // Relacionamentos (1:N)
-    private List<RegistroLeitura> registrosLeitura;
-    private List<Comentario> comentarios;
+    @JsonIgnore
+    private List<RegistroLeitura> registrosLeitura = new ArrayList<>();
+
+    @JsonIgnore
+    private List<Comentario> comentarios = new ArrayList<>();
 
     // Construtores
     public Livro() {

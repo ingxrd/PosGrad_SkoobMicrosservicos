@@ -1,5 +1,7 @@
 package br.edu.infnet.skoob_api_ingridmunhoz.model.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.time.LocalDate; // ✅ Usando LocalDate (mais moderno que Date)
 
 public class RegistroLeitura {
@@ -13,7 +15,9 @@ public class RegistroLeitura {
     private LocalDate dataConclusao;
 
     // Relacionamentos (N:1)
+    @JsonIgnore
     private Livro livro;
+    @JsonIgnore
     private Usuario usuario;
 
     // Construtores

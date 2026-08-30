@@ -1,5 +1,7 @@
 package br.edu.infnet.skoob_api_ingridmunhoz.model.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.time.LocalDateTime;
 
 public class Comentario {
@@ -13,7 +15,9 @@ public class Comentario {
     private boolean editado;
 
     // Relacionamentos (N:1)
+    @JsonIgnore
     private Usuario usuario;
+    @JsonIgnore
     private Livro livro;
 
     // Construtores

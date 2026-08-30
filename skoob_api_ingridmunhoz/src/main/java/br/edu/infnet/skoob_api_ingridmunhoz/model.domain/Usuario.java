@@ -1,5 +1,7 @@
 package br.edu.infnet.skoob_api_ingridmunhoz.model.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,13 +15,13 @@ public class Usuario {
     private String senha;
 
     // Relacionamentos (1:N)
-    private List<RegistroLeitura> registrosLeitura;
-    private List<Comentario> comentarios;
+    @JsonIgnore
+    private List<RegistroLeitura> registrosLeitura = new ArrayList<>();
+    @JsonIgnore
+    private List<Comentario> comentarios = new ArrayList<>();
 
     // Construtores
     public Usuario() {
-        this.registrosLeitura = new ArrayList<>();
-        this.comentarios = new ArrayList<>();
     }
 
     public Usuario(int id, String nome, String username, String email, String senha) {
