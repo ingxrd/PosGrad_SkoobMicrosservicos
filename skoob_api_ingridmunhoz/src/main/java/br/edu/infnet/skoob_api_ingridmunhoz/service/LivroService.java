@@ -1,114 +1,136 @@
 package br.edu.infnet.skoob_api_ingridmunhoz.service;
 
+import br.edu.infnet.skoob_api_ingridmunhoz.exception.IdentificadorDuplicadoException;
+import br.edu.infnet.skoob_api_ingridmunhoz.exception.RecursoNaoEncontradoException;
 import br.edu.infnet.skoob_api_ingridmunhoz.model.domain.Livro;
+import br.edu.infnet.skoob_api_ingridmunhoz.repository.LivroRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
 import java.util.List;
 
 @Service
-public class LivroService extends BaseService<Livro> {
+public class LivroService {
 
-    @Override
-    protected Long getId(Livro livro) {
-        return livro != null ? (long) livro.getId() : null;
+    private final LivroRepository livroRepository;
+
+    public LivroService(LivroRepository livroRepository) {
+        this.livroRepository = livroRepository;
     }
 
-    @Override
-    protected void setId(Livro livro, Long id) {
-        if (livro != null) {
-            livro.setId(id.intValue());
+    // CRUD
+    public Livro incluir(Livro livro) {
+        validarLivro(livro);
+        return livroRepository.save(livro);
+    }
+
+    public Livro alterar(Livro livro) {
+        Livro existente = obterPorId(livro.getId());
+
+        if (livro.getIsbn() != null && !livro.getIsbn().isEmpty()
+                && !livro.getIsbn().equals(existente.getIsbn())
+                && livroRepository.existsByIsbn(livro.getIsbn())) {
+            throw new IdentificadorDuplicadoException(
+                    "ISBN '" + livro.getIsbn() + "' já está cadastrado!");
+        }
+
+        return livroRepository.save(livro);
+    }
+
+
+    public void excluir(Long id) {
+        verificarExistencia(id);
+        livroRepository.deleteById(id);
+    }
+
+    public Livro obterPorId(Long id) {
+        return livroRepository.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException(
+                        "Nenhum livro encontrado para o identificador " + id));
+    }
+
+    public List<Livro> obterLista() {
+        return livroRepository.findAll();
+    }
+
+    // Validações
+    private void validarLivro(Livro livro) {
+        if (livro == null) {
+            throw new IllegalArgumentException("Livro não pode ser nulo!");
+        }
+        if (livro.getIsbn() != null && !livro.getIsbn().isEmpty()
+                && livroRepository.existsByIsbn(livro.getIsbn())) {
+            throw new IdentificadorDuplicadoException(
+                    "ISBN '" + livro.getIsbn() + "' já está cadastrado!");
         }
     }
 
-    // ==================== CONSULTAS ESPECÍFICAS ====================
+    private void verificarExistencia(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("Identificador não pode ser nulo!");
+        }
+        if (!livroRepository.existsById(id)) {
+            throw new RecursoNaoEncontradoException(
+                    "Nenhum livro encontrado para o identificador " + id);
+        }
+    }
 
-    /**
-     * Busca livros por título (case insensitive).
-     */
+    // Consultas com Spring Data
     public List<Livro> buscarPorTitulo(String titulo) {
-        return filtrarPorTexto(titulo, Livro::getTitulo);
+        if (titulo == null || titulo.trim().isEmpty()) {
+            return obterLista();
+        }
+        return livroRepository.findByTituloContainingIgnoreCase(titulo.trim());
     }
 
-    /**
-     * Busca livros por autor (case insensitive).
-     */
     public List<Livro> buscarPorAutor(String autor) {
-        return filtrarPorTexto(autor, Livro::getAutor);
+        if (autor == null || autor.trim().isEmpty()) {
+            return obterLista();
+        }
+        return livroRepository.findByAutorContainingIgnoreCase(autor.trim());
     }
 
-    /**
-     * Busca livros por gênero.
-     */
     public List<Livro> buscarPorGenero(String genero) {
-        return filtrarPorTexto(genero, Livro::getGenero);
+        if (genero == null || genero.trim().isEmpty()) {
+            return obterLista();
+        }
+        return livroRepository.findByGeneroContainingIgnoreCase(genero.trim());
     }
 
-    /**
-     * Lista livros ordenados por avaliação (do maior para o menor).
-     * Exemplo de ordenação com Comparator.
-     */
-    public List<Livro> listarPorAvaliacao() {
-        return ordenarPor(Comparator.comparing(Livro::getAvaliacaoMedia).reversed());
-    }
-
-    /**
-     * Lista livros disponíveis para empréstimo.
-     */
     public List<Livro> listarDisponiveis() {
-        return obterLista().stream()
-                .filter(Livro::isDisponivel)
-                .collect(java.util.stream.Collectors.toList());
+        return livroRepository.findByDisponivelTrue();
     }
 
-    /**
-     * Lista livros por faixa de páginas.
-     * Exemplo de filtro com range.
-     */
-    public List<Livro> listarPorFaixaDePaginas(int min, int max) {
-        return obterLista().stream()
-                .filter(l -> l.getPaginas() >= min && l.getPaginas() <= max)
-                .collect(java.util.stream.Collectors.toList());
+    public List<Livro> listarPorAvaliacao() {
+        return livroRepository.findAllByOrderByAvaliacaoMediaDesc();
     }
 
-    /**
-     * Lista os 5 livros mais bem avaliados.
-     * Exemplo de Stream com limit().
-     */
     public List<Livro> listarTop5MelhorAvaliados() {
-        return obterLista().stream()
-                .sorted(Comparator.comparing(Livro::getAvaliacaoMedia).reversed())
-                .limit(5)
-                .collect(java.util.stream.Collectors.toList());
+        return livroRepository.findTop5ByOrderByAvaliacaoMediaDesc();
     }
 
-    /**
-     * Calcula a média de páginas de todos os livros.
-     * Exemplo de Stream com mapToDouble e average.
-     */
-    public double calcularMediaPaginas() {
-        return obterLista().stream()
-                .mapToInt(Livro::getPaginas)
-                .average()
-                .orElse(0.0);
+    public List<Livro> listarPorFaixaDePaginas(int min, int max) {
+        return livroRepository.findByPaginasBetween(min, max);
     }
 
-    /**
-     * Busca livros por termo (título ou autor).
-     * Exemplo de busca com múltiplos critérios.
-     */
     public List<Livro> buscarPorTermo(String termo) {
         if (termo == null || termo.trim().isEmpty()) {
             return obterLista();
         }
 
-        String termoLower = termo.toLowerCase().trim();
+        String termoLower = termo.trim().toLowerCase();
+        // Combina duas consultas
+        List<Livro> porTitulo = buscarPorTitulo(termoLower);
+        List<Livro> porAutor = buscarPorAutor(termoLower);
 
-        return obterLista().stream()
-                .filter(livro ->
-                        (livro.getTitulo() != null && livro.getTitulo().toLowerCase().contains(termoLower)) ||
-                                (livro.getAutor() != null && livro.getAutor().toLowerCase().contains(termoLower))
-                )
-                .collect(java.util.stream.Collectors.toList());
+        // Remove duplicatas (Stream)
+        porTitulo.addAll(porAutor);
+        return porTitulo.stream().distinct().collect(java.util.stream.Collectors.toList());
+    }
+
+    public double calcularMediaPaginas() {
+        return livroRepository.findAll().stream()
+                .mapToInt(Livro::getPaginas)
+                .average()
+                .orElse(0.0);
     }
 }

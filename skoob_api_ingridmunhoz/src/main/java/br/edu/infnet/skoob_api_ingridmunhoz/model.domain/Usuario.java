@@ -1,31 +1,57 @@
 package br.edu.infnet.skoob_api_ingridmunhoz.model.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-public class Usuario {
+@Entity
+@Table(name = "usuarios")
+public class Usuario implements Identificavel{
 
-    // Atributos
-    private int id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @NotBlank(message = "O nome deve ser informado")
+    @Size(max = 100, message = "O nome deve ter no máximo 100 caracteres")
     private String nome;
+
+    @NotBlank(message = "O username deve ser informado")
+    @Size(max = 50, message = "O username deve ter no máximo 50 caracteres")
+    @Column(unique = true)
     private String username;
+
+    @NotBlank(message = "O email deve ser informado")
+    @Email(message = "Email inválido")
+    @Column(unique = true)
     private String email;
+
+    @NotBlank(message = "A senha deve ser informada")
+    @Size(min = 3, max = 100, message = "A senha deve ter entre 3 e 100 caracteres")
     private String senha;
 
     // Relacionamentos (1:N)
-    @JsonIgnore
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<RegistroLeitura> registrosLeitura = new ArrayList<>();
-    @JsonIgnore
+
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Comentario> comentarios = new ArrayList<>();
+
 
     // Construtores
     public Usuario() {
     }
 
-    public Usuario(int id, String nome, String username, String email, String senha) {
-        this.id = id;
+    public Usuario(String nome, String username, String email, String senha) {
+        //this.id = id;
         this.nome = nome;
         this.username = username;
         this.email = email;
@@ -64,13 +90,6 @@ public class Usuario {
     }
 
     // Getters e Setters
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
 
     public String getNome() {
         return nome;
@@ -113,10 +132,18 @@ public class Usuario {
     }
 
     public List<Comentario> getComentarios() {
-        return comentarios;
+        return Collections.unmodifiableList(comentarios);
     }
 
     public void setComentarios(List<Comentario> comentarios) {
         this.comentarios = comentarios;
+    }
+
+    @Override
+    public Long getId() {
+        return id;
+    }
+    public void setId(Long id) {
+        this.id = id;
     }
 }

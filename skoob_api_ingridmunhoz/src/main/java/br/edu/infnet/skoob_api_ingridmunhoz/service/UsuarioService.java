@@ -1,74 +1,118 @@
 package br.edu.infnet.skoob_api_ingridmunhoz.service;
 
+import br.edu.infnet.skoob_api_ingridmunhoz.exception.IdentificadorDuplicadoException;
+import br.edu.infnet.skoob_api_ingridmunhoz.exception.RecursoNaoEncontradoException;
 import br.edu.infnet.skoob_api_ingridmunhoz.model.domain.Usuario;
+import br.edu.infnet.skoob_api_ingridmunhoz.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
 import java.util.List;
 
-// Classe irá implementar suas especificidades a partir da BaseService, recebendo o dominio Usuario.
-
 @Service
-public class UsuarioService extends BaseService<Usuario> {
+public class UsuarioService {
 
-    @Override
-    protected Long getId(Usuario usuario) {
-        return usuario != null ? (long) usuario.getId() : null;
+    private final UsuarioRepository usuarioRepository;
+
+    public UsuarioService(UsuarioRepository usuarioRepository) {
+        this.usuarioRepository = usuarioRepository;
     }
 
-    @Override
-    protected void setId(Usuario usuario, Long id) {
-        if (usuario != null) {
-            usuario.setId(id.intValue());
+    // CRUD
+    public Usuario incluir(Usuario usuario) {
+        validarUsuario(usuario);
+        return usuarioRepository.save(usuario);
+    }
+
+    public Usuario alterar(Usuario usuario) {
+        Usuario existente = obterPorId(usuario.getId());
+
+        if (!existente.getUsername().equals(usuario.getUsername())
+                && usuarioRepository.existsByUsername(usuario.getUsername())) {
+            throw new IdentificadorDuplicadoException(
+                    "Username '" + usuario.getUsername() + "' já está em uso!");
+        }
+
+        if (!existente.getEmail().equals(usuario.getEmail())
+                && usuarioRepository.existsByEmail(usuario.getEmail())) {
+            throw new IdentificadorDuplicadoException(
+                    "Email '" + usuario.getEmail() + "' já está em uso!");
+        }
+
+        return usuarioRepository.save(usuario);
+    }
+
+    public void excluir(Long id) {
+        verificarExistencia(id);
+        usuarioRepository.deleteById(id);
+    }
+
+    public Usuario obterPorId(Long id) {
+        return usuarioRepository.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException(
+                        "Nenhum usuário encontrado para o identificador " + id));
+    }
+
+    public List<Usuario> obterLista() {
+        return usuarioRepository.findAll();
+    }
+
+    // Validações
+    private void validarUsuario(Usuario usuario) {
+        if (usuario == null) {
+            throw new IllegalArgumentException("Usuário não pode ser nulo!");
+        }
+
+        if (usuarioRepository.existsByUsername(usuario.getUsername())) {
+            throw new IdentificadorDuplicadoException(
+                    "Username '" + usuario.getUsername() + "' já está em uso!");
+        }
+
+        if (usuarioRepository.existsByEmail(usuario.getEmail())) {
+            throw new IdentificadorDuplicadoException(
+                    "Email '" + usuario.getEmail() + "' já está em uso!");
         }
     }
 
-    // ==================== CONSULTAS ESPECÍFICAS ====================
+    private void verificarExistencia(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("Identificador não pode ser nulo!");
+        }
+        if (!usuarioRepository.existsById(id)) {
+            throw new RecursoNaoEncontradoException(
+                    "Nenhum usuário encontrado para o identificador " + id);
+        }
+    }
 
-    /**
-     * Busca usuários por nome (case insensitive).
-     * Exemplo de filtro com Stream e Lambda.
-     */
+    // Consultas com Spring Data
     public List<Usuario> buscarPorNome(String nome) {
-        return filtrarPorTexto(nome, Usuario::getNome);
+        if (nome == null || nome.trim().isEmpty()) {
+            return obterLista();
+        }
+        return usuarioRepository.findByNomeContainingIgnoreCase(nome.trim());
     }
 
-    /**
-     * Busca usuários por username (case insensitive).
-     */
     public List<Usuario> buscarPorUsername(String username) {
-        return filtrarPorTexto(username, Usuario::getUsername);
+        if (username == null || username.trim().isEmpty()) {
+            return obterLista();
+        }
+        return usuarioRepository.findByUsernameContainingIgnoreCase(username.trim());
     }
 
-    /**
-     * Busca um usuário pelo email (exato).
-     */
     public Usuario buscarPorEmail(String email) {
         if (email == null) {
             return null;
         }
-
-        return obterLista().stream()
-                .filter(u -> email.equalsIgnoreCase(u.getEmail()))
-                .findFirst()
-                .orElse(null);
+        return usuarioRepository.findByEmail(email).orElse(null);
     }
 
-    /**
-     * Lista usuários ordenados por nome (alfabético).
-     * Exemplo de ordenação com Comparator.
-     */
-    public List<Usuario> listarOrdenadosPorNome() {
-        return ordenarPor(Comparator.comparing(Usuario::getNome));
+    public Usuario buscarPorUsernameExato(String username) {
+        if (username == null) {
+            return null;
+        }
+        return usuarioRepository.findByUsername(username).orElse(null);
     }
 
-    /**
-     * Lista usuários ativos (que têm pelo menos um registro de leitura).
-     * Exemplo de filtro complexo.
-     */
-    public List<Usuario> listarUsuariosAtivos() {
-        return obterLista().stream()
-                .filter(u -> u.getRegistrosLeitura() != null && !u.getRegistrosLeitura().isEmpty())
-                .collect(java.util.stream.Collectors.toList());
+    public boolean existePorUsername(String username) {
+        return usuarioRepository.existsByUsername(username);
     }
 }

@@ -2,10 +2,12 @@ package br.edu.infnet.skoob_api_ingridmunhoz.controller;
 
 import br.edu.infnet.skoob_api_ingridmunhoz.model.domain.RegistroLeitura;
 import br.edu.infnet.skoob_api_ingridmunhoz.service.RegistroLeituraService;
-import org.springframework.http.HttpStatus;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -69,15 +71,20 @@ public class RegistroLeituraController {
 
     // POST /registros-leitura - Incluir novo registro
     @PostMapping
-    public ResponseEntity<RegistroLeitura> incluir(@RequestBody RegistroLeitura registro) {
+    public ResponseEntity<RegistroLeitura> incluir(@Valid @RequestBody RegistroLeitura registro) {
         RegistroLeitura novoRegistro = registroService.incluir(registro);
-        return ResponseEntity.status(HttpStatus.CREATED).body(novoRegistro);
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(novoRegistro.getId())
+                .toUri();
+        return ResponseEntity.created(location).body(novoRegistro);
     }
 
     // PUT /registros-leitura/{id} - Alterar registro
     @PutMapping("/{id}")
-    public ResponseEntity<RegistroLeitura> alterar(@PathVariable Long id, @RequestBody RegistroLeitura registro) {
-        registro.setId(id.intValue());
+    public ResponseEntity<RegistroLeitura> alterar(@PathVariable Long id, @Valid @RequestBody RegistroLeitura registro) {
+        registro.setId(id);
         RegistroLeitura registroAlterado = registroService.alterar(registro);
         return ResponseEntity.ok(registroAlterado);
     }

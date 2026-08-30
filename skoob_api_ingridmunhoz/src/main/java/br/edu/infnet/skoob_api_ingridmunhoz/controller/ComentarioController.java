@@ -2,10 +2,12 @@ package br.edu.infnet.skoob_api_ingridmunhoz.controller;
 
 import br.edu.infnet.skoob_api_ingridmunhoz.model.domain.Comentario;
 import br.edu.infnet.skoob_api_ingridmunhoz.service.ComentarioService;
-import org.springframework.http.HttpStatus;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -62,15 +64,20 @@ public class ComentarioController {
 
     // POST /comentarios - Incluir novo comentário
     @PostMapping
-    public ResponseEntity<Comentario> incluir(@RequestBody Comentario comentario) {
+    public ResponseEntity<Comentario> incluir(@Valid @RequestBody Comentario comentario) {
         Comentario novoComentario = comentarioService.incluir(comentario);
-        return ResponseEntity.status(HttpStatus.CREATED).body(novoComentario);
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(novoComentario.getId())
+                .toUri();
+        return ResponseEntity.created(location).body(novoComentario);
     }
 
     // PUT /comentarios/{id} - Alterar comentário
     @PutMapping("/{id}")
-    public ResponseEntity<Comentario> alterar(@PathVariable Long id, @RequestBody Comentario comentario) {
-        comentario.setId(id.intValue());
+    public ResponseEntity<Comentario> alterar(@PathVariable Long id, @Valid @RequestBody Comentario comentario) {
+        comentario.setId(id);
         Comentario comentarioAlterado = comentarioService.alterar(comentario);
         return ResponseEntity.ok(comentarioAlterado);
     }

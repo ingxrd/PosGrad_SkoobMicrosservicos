@@ -2,9 +2,10 @@ package br.edu.infnet.skoob_api_ingridmunhoz.controller;
 
 import br.edu.infnet.skoob_api_ingridmunhoz.model.domain.Usuario;
 import br.edu.infnet.skoob_api_ingridmunhoz.service.UsuarioService;
-import org.springframework.http.HttpStatus;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
@@ -53,15 +54,20 @@ public class UsuarioController {
 
     // POST /usuarios - Incluir novo usuário
     @PostMapping
-    public ResponseEntity<Usuario> incluir(@RequestBody Usuario usuario) {
+    public ResponseEntity<Usuario> incluir(@Valid @RequestBody Usuario usuario) {
         Usuario novoUsuario = usuarioService.incluir(usuario);
-        return ResponseEntity.status(HttpStatus.CREATED).body(novoUsuario);
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(novoUsuario.getId())
+                .toUri();
+        return ResponseEntity.created(location).body(novoUsuario);
     }
 
     // PUT /usuarios/{id} - Alterar usuário existente
     @PutMapping("/{id}")
-    public ResponseEntity<Usuario> alterar(@PathVariable Long id, @RequestBody Usuario usuario) {
-        usuario.setId(id.intValue());
+    public ResponseEntity<Usuario> alterar(@PathVariable Long id, @Valid @RequestBody Usuario usuario) {
+        usuario.setId(id);
         Usuario usuarioAlterado = usuarioService.alterar(usuario);
         return ResponseEntity.ok(usuarioAlterado);
     }

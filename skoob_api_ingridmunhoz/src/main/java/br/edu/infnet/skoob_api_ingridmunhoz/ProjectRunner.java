@@ -17,7 +17,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Component
-public class Loader implements CommandLineRunner {
+public class ProjectRunner implements CommandLineRunner {
 
     private final UsuarioService usuarioService;
     private final LivroService livroService;
@@ -32,8 +32,8 @@ public class Loader implements CommandLineRunner {
     private Livro livro2;
     private Livro livro3;
 
-    public Loader(UsuarioService usuarioService, LivroService livroService,
-                  RegistroLeituraService registroLeituraService, ComentarioService comentarioService) {
+    public ProjectRunner(UsuarioService usuarioService, LivroService livroService,
+                         RegistroLeituraService registroLeituraService, ComentarioService comentarioService) {
         this.usuarioService = usuarioService;
         this.livroService = livroService;
         this.registroLeituraService = registroLeituraService;
@@ -44,13 +44,22 @@ public class Loader implements CommandLineRunner {
     public void run(String... args) throws Exception {
 
         System.out.println("========================================");
-        System.out.println("INICIANDO SISTEMA SKOOB - ETAPA 2");
+        System.out.println("INICIANDO SISTEMA SKOOB - ETAPA 4");
         System.out.println("========================================\n");
 
-        criarUsuarios();
-        criarLivros();
-        criarRegistrosLeitura();
-        criarComentarios();
+        // Proteção: se a aplicação já rodou antes e o banco não foi resetado,
+        // a carga inicial pode colidir com dados já persistidos.
+        // Nesse caso, apenas avisamos e seguimos sem interromper a inicialização.
+        try {
+            criarUsuarios();
+            criarLivros();
+            criarRegistrosLeitura();
+            criarComentarios();
+        } catch (IdentificadorDuplicadoException e) {
+            System.out.println("!!! Carga inicial ignorada: dados de exemplo já existem no banco.");
+            System.out.println("    Detalhe: " + e.getMessage());
+            System.out.println();
+        }
 
         executarConsultasComStreams();
         testarExcecoes();
@@ -58,14 +67,14 @@ public class Loader implements CommandLineRunner {
         exibirInstrucoesFinais();
     }
 
-    // ==================== SEMANA 01: CRIAÇÃO DOS DADOS ====================
+    // ==================== CRIAÇÃO DOS DADOS ====================
 
     private void criarUsuarios() {
-        System.out.println("--- SEMANA 01: CRIANDO OBJETOS ---\n");
+        System.out.println("--- CRIANDO OBJETOS ---\n");
 
-        usuario1 = new Usuario(1, "Ingrid Munhoz", "ingrid", "ingrid@email.com", "123");
-        usuario2 = new Usuario(2, "William Poiato", "william", "william@email.com", "456");
-        usuario3 = new Usuario(3, "Tito", "tito", "tito@email.com", "789");
+        usuario1 = new Usuario("Ingrid Munhoz", "ingrid", "ingrid@email.com", "123");
+        usuario2 = new Usuario("William Poiato", "william", "william@email.com", "456");
+        usuario3 = new Usuario("Tito", "tito", "tito@email.com", "789");
 
         usuarioService.incluir(usuario1);
         usuarioService.incluir(usuario2);
@@ -80,19 +89,19 @@ public class Loader implements CommandLineRunner {
 
     private void criarLivros() {
         livro1 = new Livro(
-                1, "O Senhor dos Anéis", "J.R.R. Tolkien", "978-0-547-92934-9",
+                "O Senhor dos Anéis", "J.R.R. Tolkien", "978-0-547-92934-9",
                 "HarperCollins", 1216, "Fantasia", 4.8, true,
                 "Uma jornada épica pela Terra Média..."
         );
 
         livro2 = new Livro(
-                2, "Dom Casmurro", "Machado de Assis", "978-85-250-4261-3",
+                "Dom Casmurro", "Machado de Assis", "978-85-250-4261-3",
                 "Editora Globo", 256, "Romance", 4.5, true,
                 "A história de Bentinho e Capitu..."
         );
 
         livro3 = new Livro(
-                3, "A Arte da Guerra", "Sun Tzu", "978-85-336-0361-3",
+                "A Arte da Guerra", "Sun Tzu", "978-85-336-0361-3",
                 "Martins Fontes", 144, "Estratégia", 4.2, false,
                 "Ensinamentos milenares sobre estratégia..."
         );
@@ -110,17 +119,17 @@ public class Loader implements CommandLineRunner {
 
     private void criarRegistrosLeitura() {
         RegistroLeitura registro1 = new RegistroLeitura(
-                1, "LENDO", 300, 25.0, 0,
+                "LENDO", 300, 25.0, 0,
                 LocalDate.of(2026, 8, 1), null
         );
 
         RegistroLeitura registro2 = new RegistroLeitura(
-                2, "TERMINADO", 256, 100.0, 5,
+                "TERMINADO", 256, 100.0, 5,
                 LocalDate.of(2026, 7, 15), LocalDate.of(2026, 8, 20)
         );
 
         RegistroLeitura registro3 = new RegistroLeitura(
-                3, "LENDO", 50, 35.0, 0,
+                "LENDO", 50, 35.0, 0,
                 LocalDate.of(2026, 8, 10), null
         );
 
@@ -152,12 +161,12 @@ public class Loader implements CommandLineRunner {
 
     private void criarComentarios() {
         Comentario comentario1 = new Comentario(
-                1, "Fantástico!", "Tolkien é um gênio! A história é envolvente.",
+                "Fantástico!", "Tolkien é um gênio! A história é envolvente.",
                 5, LocalDateTime.now(), false
         );
 
         Comentario comentario2 = new Comentario(
-                2, "Bom livro", "A história é interessante. Traiu ou não traiu??",
+                "Bom livro", "A história é interessante. Traiu ou não traiu??",
                 3, LocalDateTime.now(), false
         );
 
@@ -191,7 +200,7 @@ public class Loader implements CommandLineRunner {
 
     private void executarConsultasComStreams() {
         System.out.println("========================================");
-        System.out.println("   CONSULTAS COM STREAMS (ETAPA 2)");
+        System.out.println("   CONSULTAS COM STREAMS");
         System.out.println("========================================\n");
 
         System.out.println("1. BUSCAR LIVROS POR TITULO: 'Senhor'");
@@ -214,7 +223,7 @@ public class Loader implements CommandLineRunner {
                 .forEach(l -> System.out.println("   -> " + l.getTitulo() + " - " + l.getAvaliacaoMedia()));
         System.out.println();
 
-        System.out.println("5. TOP 3 MELHORES AVALIADOS (limit)");
+        System.out.println("5. TOP 5 MELHORES AVALIADOS (limit)");
         livroService.listarTop5MelhorAvaliados()
                 .forEach(l -> System.out.println("   -> " + l.getTitulo() + " - " + l.getAvaliacaoMedia()));
         System.out.println();
@@ -265,21 +274,21 @@ public class Loader implements CommandLineRunner {
 
     private void testarExcecoes() {
         System.out.println("========================================");
-        System.out.println("   TESTE DE EXCECOES (ETAPA 2)");
+        System.out.println("   TESTE DE EXCECOES");
         System.out.println("========================================\n");
 
-        testarIncluirLivroIdDuplicado();
+        testarIncluirLivroIsbnDuplicado();
         testarBuscarLivroIdInexistente();
-        testarIncluirUsuarioIdDuplicado();
+        testarIncluirUsuarioDuplicado();
         testarExcluirLivroIdInexistente();
         testarAlterarLivroIdInexistente();
     }
 
-    private void testarIncluirLivroIdDuplicado() {
-        System.out.println("TESTE 1: Incluir livro com ID duplicado");
+    private void testarIncluirLivroIsbnDuplicado() {
+        System.out.println("TESTE 1: Incluir livro com ISBN duplicado");
         try {
             Livro livroDuplicado = new Livro(
-                    1, "Livro Duplicado", "Autor Teste", "0000",
+                    "Livro Duplicado", "Autor Teste", "978-0-547-92934-9", // mesmo ISBN do livro1
                     "Editora Teste", 100, "Ficção", 4.0, true,
                     "Sinopse de teste..."
             );
@@ -302,10 +311,12 @@ public class Loader implements CommandLineRunner {
         System.out.println();
     }
 
-    private void testarIncluirUsuarioIdDuplicado() {
-        System.out.println("TESTE 3: Incluir usuário com ID duplicado");
+    private void testarIncluirUsuarioDuplicado() {
+        System.out.println("TESTE 3: Incluir usuário com username/email duplicado");
         try {
-            Usuario usuarioDuplicado = new Usuario(1, "Duplicado", "dup", "dup@email.com", "123");
+            Usuario usuarioDuplicado = new Usuario(
+                    "Duplicado", "ingrid", "ingrid@email.com", "123" // mesmos dados do usuario1
+            );
             usuarioService.incluir(usuarioDuplicado);
             System.out.println("   ERRO: Não deveria ter incluído!");
         } catch (IdentificadorDuplicadoException e) {
@@ -329,10 +340,13 @@ public class Loader implements CommandLineRunner {
         System.out.println("TESTE 5: Alterar livro com ID inexistente");
         try {
             Livro livroInexistente = new Livro(
-                    999, "Inexistente", "Autor", "0000",
+                    "Inexistente", "Autor", "0000-INEXISTENTE",
                     "Editora", 100, "Ficção", 4.0, true,
                     "Sinopse..."
             );
+
+            livroInexistente.setId(999L);
+
             livroService.alterar(livroInexistente);
             System.out.println("   ERRO: Não deveria ter alterado!");
         } catch (RecursoNaoEncontradoException e) {
@@ -374,12 +388,13 @@ public class Loader implements CommandLineRunner {
         System.out.println("  Total de registros de leitura: " + registroLeituraService.obterLista().size());
         System.out.println("  Total de comentários: " + comentarioService.obterLista().size());
         System.out.println("  Média de páginas dos livros: " + String.format("%.1f", livroService.calcularMediaPaginas()));
-        System.out.println("  Média de avaliações dos comentários: " + String.format("%.1f", comentarioService.calcularMediaAvaliacoesComentarios()));
+        System.out.println("  Média de avaliações dos comentários: " + String.format("%.1f", comentarioService.calcularMediaAvaliacoes()));
         System.out.println();
     }
 
     private void exibirInstrucoesFinais() {
         System.out.println("========================================");
         System.out.println("   SKOOB INICIALIZADO COM SUCESSO!");
+        System.out.println("========================================");
     }
 }

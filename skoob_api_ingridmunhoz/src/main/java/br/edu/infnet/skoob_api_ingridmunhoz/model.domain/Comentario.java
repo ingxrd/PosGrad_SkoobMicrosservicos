@@ -1,32 +1,55 @@
 package br.edu.infnet.skoob_api_ingridmunhoz.model.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
 
-public class Comentario {
+@Entity
+@Table(name = "comentarios")
+public class Comentario implements Identificavel {
 
-    // Atributos
-    private int id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @NotBlank(message = "O título deve ser informado")
+    @Size(max = 100, message = "O título deve ter no máximo 100 caracteres")
     private String titulo;
+
+    @NotBlank(message = "O comentário deve ser informado")
+    @Size(max = 2000, message = "O comentário deve ter no máximo 2000 caracteres")
+    @Column(length = 2000)
     private String comentario;
-    private int avaliacao;        // 1 a 5 estrelas
+
+    @Min(value = 1, message = "Avaliação deve ser entre 1 e 5")
+    @Max(value = 5, message = "Avaliação deve ser entre 1 e 5")
+    private int avaliacao;
+
     private LocalDateTime dataCriacao;
     private boolean editado;
 
-    // Relacionamentos (N:1)
-    @JsonIgnore
+    // Relacionamentos
+    @ManyToOne
+    @JoinColumn(name = "usuario_id", nullable = false)
+    @JsonBackReference
     private Usuario usuario;
-    @JsonIgnore
+
+    @ManyToOne
+    @JoinColumn(name = "livro_id", nullable = false)
+    @JsonBackReference
     private Livro livro;
 
     // Construtores
     public Comentario() {
     }
 
-    public Comentario(int id, String titulo, String comentario, int avaliacao,
+    public Comentario(String titulo, String comentario, int avaliacao,
                       LocalDateTime dataCriacao, boolean editado) {
-        this.id = id;
         this.titulo = titulo;
         this.comentario = comentario;
         this.avaliacao = avaliacao;
@@ -37,81 +60,41 @@ public class Comentario {
     // toString()
     @Override
     public String toString() {
-        return String.format(
-                "Comentario{id=%d, usuario='%s', livro='%s', titulo='%s', " +
-                        "avaliacao=%d estrelas, editado=%s, data=%s}",
-                id,
-                usuario != null ? usuario.getUsername() : "Anônimo",
-                livro != null ? livro.getTitulo() : "Nenhum",
-                titulo != null ? titulo : "Sem título",
-                avaliacao,
-                editado ? "Sim" : "Não",
-                dataCriacao != null ? dataCriacao.toLocalDate() : "N/A"
-        );
+        return String.format("Comentario{id=%d, titulo='%s', avaliacao=%d}",
+                id, titulo, avaliacao);
     }
 
     // Getters e Setters
-    public int getId() {
+    @Override
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+
+    public void setId(Long id) {
         this.id = id;
     }
 
-    public String getTitulo() {
-        return titulo;
-    }
+    public String getTitulo() { return titulo; }
+    public void setTitulo(String titulo) { this.titulo = titulo; }
 
-    public void setTitulo(String titulo) {
-        this.titulo = titulo;
-    }
+    public String getComentario() { return comentario; }
+    public void setComentario(String comentario) { this.comentario = comentario; }
 
-    public String getComentario() {
-        return comentario;
-    }
+    public int getAvaliacao() { return avaliacao; }
+    public void setAvaliacao(int avaliacao) { this.avaliacao = avaliacao; }
 
-    public void setComentario(String comentario) {
-        this.comentario = comentario;
-    }
-
-    public int getAvaliacao() {
-        return avaliacao;
-    }
-
-    public void setAvaliacao(int avaliacao) {
-        this.avaliacao = avaliacao;
-    }
-
-    public LocalDateTime getDataCriacao() {
-        return dataCriacao;
-    }
-
+    public LocalDateTime getDataCriacao() { return dataCriacao; }
     public void setDataCriacao(LocalDateTime dataCriacao) {
         this.dataCriacao = dataCriacao;
     }
 
-    public boolean isEditado() {
-        return editado;
-    }
+    public boolean isEditado() { return editado; }
+    public void setEditado(boolean editado) { this.editado = editado; }
 
-    public void setEditado(boolean editado) {
-        this.editado = editado;
-    }
+    public Usuario getUsuario() { return usuario; }
+    public void setUsuario(Usuario usuario) { this.usuario = usuario; }
 
-    public Usuario getUsuario() {
-        return usuario;
-    }
-
-    public void setUsuario(Usuario usuario) {
-        this.usuario = usuario;
-    }
-
-    public Livro getLivro() {
-        return livro;
-    }
-
-    public void setLivro(Livro livro) {
-        this.livro = livro;
-    }
+    public Livro getLivro() { return livro; }
+    public void setLivro(Livro livro) { this.livro = livro; }
 }

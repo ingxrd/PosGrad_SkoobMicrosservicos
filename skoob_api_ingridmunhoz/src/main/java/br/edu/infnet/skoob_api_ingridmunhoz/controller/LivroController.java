@@ -2,10 +2,12 @@ package br.edu.infnet.skoob_api_ingridmunhoz.controller;
 
 import br.edu.infnet.skoob_api_ingridmunhoz.model.domain.Livro;
 import br.edu.infnet.skoob_api_ingridmunhoz.service.LivroService;
-import org.springframework.http.HttpStatus;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -79,15 +81,20 @@ public class LivroController {
 
     // POST /livros - Incluir novo livro
     @PostMapping
-    public ResponseEntity<Livro> incluir(@RequestBody Livro livro) {
+    public ResponseEntity<Livro> incluir(@Valid @RequestBody Livro livro) {
         Livro novoLivro = livroService.incluir(livro);
-        return ResponseEntity.status(HttpStatus.CREATED).body(novoLivro);
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(novoLivro.getId())
+                .toUri();
+        return ResponseEntity.created(location).body(novoLivro);
     }
 
     // PUT /livros/{id} - Alterar livro
     @PutMapping("/{id}")
-    public ResponseEntity<Livro> alterar(@PathVariable Long id, @RequestBody Livro livro) {
-        livro.setId(id.intValue());
+    public ResponseEntity<Livro> alterar(@PathVariable Long id, @Valid @RequestBody Livro livro) {
+        livro.setId(id);
         Livro livroAlterado = livroService.alterar(livro);
         return ResponseEntity.ok(livroAlterado);
     }
