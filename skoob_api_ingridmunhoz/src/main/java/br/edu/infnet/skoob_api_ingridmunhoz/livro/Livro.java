@@ -1,5 +1,8 @@
-package br.edu.infnet.skoob_api_ingridmunhoz.model.domain;
+package br.edu.infnet.skoob_api_ingridmunhoz.livro;
 
+import br.edu.infnet.skoob_api_ingridmunhoz.comentario.Comentario;
+import br.edu.infnet.skoob_api_ingridmunhoz.shared.Identificavel;
+import br.edu.infnet.skoob_api_ingridmunhoz.registroLeitura.RegistroLeitura;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;

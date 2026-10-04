@@ -22,3 +22,7 @@ Diagrama de relacionamento entre as principais entidades do sistema:
 
 ---
 ###### *Versão 1.0: 10.08.2026. Ingrid Munhoz*
+
+
+---
+# Microsserviços -> avançando na arquitetura

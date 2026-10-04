@@ -1,7 +1,5 @@
-package br.edu.infnet.skoob_api_ingridmunhoz.controller;
+package br.edu.infnet.skoob_api_ingridmunhoz.registroLeitura;
 
-import br.edu.infnet.skoob_api_ingridmunhoz.model.domain.RegistroLeitura;
-import br.edu.infnet.skoob_api_ingridmunhoz.service.RegistroLeituraService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

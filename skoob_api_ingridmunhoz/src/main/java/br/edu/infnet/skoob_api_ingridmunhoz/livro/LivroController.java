@@ -1,7 +1,5 @@
-package br.edu.infnet.skoob_api_ingridmunhoz.controller;
+package br.edu.infnet.skoob_api_ingridmunhoz.livro;
 
-import br.edu.infnet.skoob_api_ingridmunhoz.model.domain.Livro;
-import br.edu.infnet.skoob_api_ingridmunhoz.service.LivroService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

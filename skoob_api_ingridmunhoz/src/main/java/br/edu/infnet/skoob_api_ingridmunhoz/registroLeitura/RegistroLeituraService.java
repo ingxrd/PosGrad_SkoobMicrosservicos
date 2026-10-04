@@ -1,10 +1,10 @@
-package br.edu.infnet.skoob_api_ingridmunhoz.service;
+package br.edu.infnet.skoob_api_ingridmunhoz.registroLeitura;
 
 import br.edu.infnet.skoob_api_ingridmunhoz.exception.RecursoNaoEncontradoException;
-import br.edu.infnet.skoob_api_ingridmunhoz.model.domain.RegistroLeitura;
-import br.edu.infnet.skoob_api_ingridmunhoz.model.domain.Usuario;
-import br.edu.infnet.skoob_api_ingridmunhoz.model.domain.Livro;
-import br.edu.infnet.skoob_api_ingridmunhoz.repository.RegistroLeituraRepository;
+import br.edu.infnet.skoob_api_ingridmunhoz.livro.LivroService;
+import br.edu.infnet.skoob_api_ingridmunhoz.usuario.Usuario;
+import br.edu.infnet.skoob_api_ingridmunhoz.livro.Livro;
+import br.edu.infnet.skoob_api_ingridmunhoz.usuario.UsuarioService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

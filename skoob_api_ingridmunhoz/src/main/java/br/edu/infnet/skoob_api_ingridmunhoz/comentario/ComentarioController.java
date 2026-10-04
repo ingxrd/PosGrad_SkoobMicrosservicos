@@ -1,7 +1,5 @@
-package br.edu.infnet.skoob_api_ingridmunhoz.controller;
+package br.edu.infnet.skoob_api_ingridmunhoz.comentario;
 
-import br.edu.infnet.skoob_api_ingridmunhoz.model.domain.Comentario;
-import br.edu.infnet.skoob_api_ingridmunhoz.service.ComentarioService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

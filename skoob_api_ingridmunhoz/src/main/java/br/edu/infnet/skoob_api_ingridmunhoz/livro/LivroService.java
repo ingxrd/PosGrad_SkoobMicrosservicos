@@ -1,9 +1,7 @@
-package br.edu.infnet.skoob_api_ingridmunhoz.service;
+package br.edu.infnet.skoob_api_ingridmunhoz.livro;
 
 import br.edu.infnet.skoob_api_ingridmunhoz.exception.IdentificadorDuplicadoException;
 import br.edu.infnet.skoob_api_ingridmunhoz.exception.RecursoNaoEncontradoException;
-import br.edu.infnet.skoob_api_ingridmunhoz.model.domain.Livro;
-import br.edu.infnet.skoob_api_ingridmunhoz.repository.LivroRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

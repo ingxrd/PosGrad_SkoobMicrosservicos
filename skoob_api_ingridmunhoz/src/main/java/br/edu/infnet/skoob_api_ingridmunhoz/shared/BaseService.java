@@ -1,4 +1,4 @@
-package br.edu.infnet.skoob_api_ingridmunhoz.service;
+package br.edu.infnet.skoob_api_ingridmunhoz.shared;
 
 import br.edu.infnet.skoob_api_ingridmunhoz.exception.IdentificadorDuplicadoException;
 import br.edu.infnet.skoob_api_ingridmunhoz.exception.RecursoNaoEncontradoException;

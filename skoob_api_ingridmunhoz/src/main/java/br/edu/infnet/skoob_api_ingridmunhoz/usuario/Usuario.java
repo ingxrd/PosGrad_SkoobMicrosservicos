@@ -1,5 +1,8 @@
-package br.edu.infnet.skoob_api_ingridmunhoz.model.domain;
+package br.edu.infnet.skoob_api_ingridmunhoz.usuario;
 
+import br.edu.infnet.skoob_api_ingridmunhoz.comentario.Comentario;
+import br.edu.infnet.skoob_api_ingridmunhoz.shared.Identificavel;
+import br.edu.infnet.skoob_api_ingridmunhoz.registroLeitura.RegistroLeitura;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -12,7 +15,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "usuarios")
-public class Usuario implements Identificavel{
+public class Usuario implements Identificavel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

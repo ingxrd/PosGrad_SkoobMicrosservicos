@@ -2,14 +2,14 @@ package br.edu.infnet.skoob_api_ingridmunhoz;
 
 import br.edu.infnet.skoob_api_ingridmunhoz.exception.IdentificadorDuplicadoException;
 import br.edu.infnet.skoob_api_ingridmunhoz.exception.RecursoNaoEncontradoException;
-import br.edu.infnet.skoob_api_ingridmunhoz.model.domain.Comentario;
-import br.edu.infnet.skoob_api_ingridmunhoz.model.domain.Livro;
-import br.edu.infnet.skoob_api_ingridmunhoz.model.domain.RegistroLeitura;
-import br.edu.infnet.skoob_api_ingridmunhoz.model.domain.Usuario;
-import br.edu.infnet.skoob_api_ingridmunhoz.service.ComentarioService;
-import br.edu.infnet.skoob_api_ingridmunhoz.service.LivroService;
-import br.edu.infnet.skoob_api_ingridmunhoz.service.RegistroLeituraService;
-import br.edu.infnet.skoob_api_ingridmunhoz.service.UsuarioService;
+import br.edu.infnet.skoob_api_ingridmunhoz.comentario.Comentario;
+import br.edu.infnet.skoob_api_ingridmunhoz.livro.Livro;
+import br.edu.infnet.skoob_api_ingridmunhoz.registroLeitura.RegistroLeitura;
+import br.edu.infnet.skoob_api_ingridmunhoz.usuario.Usuario;
+import br.edu.infnet.skoob_api_ingridmunhoz.comentario.ComentarioService;
+import br.edu.infnet.skoob_api_ingridmunhoz.livro.LivroService;
+import br.edu.infnet.skoob_api_ingridmunhoz.registroLeitura.RegistroLeituraService;
+import br.edu.infnet.skoob_api_ingridmunhoz.usuario.UsuarioService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 

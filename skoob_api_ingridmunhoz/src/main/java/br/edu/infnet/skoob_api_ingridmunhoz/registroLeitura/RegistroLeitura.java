@@ -1,5 +1,8 @@
-package br.edu.infnet.skoob_api_ingridmunhoz.model.domain;
+package br.edu.infnet.skoob_api_ingridmunhoz.registroLeitura;
 
+import br.edu.infnet.skoob_api_ingridmunhoz.livro.Livro;
+import br.edu.infnet.skoob_api_ingridmunhoz.shared.Identificavel;
+import br.edu.infnet.skoob_api_ingridmunhoz.usuario.Usuario;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;

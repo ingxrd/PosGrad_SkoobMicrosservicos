@@ -1,8 +1,6 @@
-package br.edu.infnet.skoob_api_ingridmunhoz.repository;
+package br.edu.infnet.skoob_api_ingridmunhoz.comentario;
 
-import br.edu.infnet.skoob_api_ingridmunhoz.model.domain.Comentario;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
