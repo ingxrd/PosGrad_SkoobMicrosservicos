@@ -76,8 +76,12 @@ public class Livro implements Identificavel {
     // toString()
     @Override
     public String toString() {
-        return String.format("Livro{id=%d, titulo='%s', autor='%s', avaliacao=%.1f}",
-                id, titulo, autor, avaliacaoMedia);
+        return "Livro{" +
+                "id=" + id +
+                ", titulo='" + titulo + '\'' +
+                ", autor='" + autor + '\'' +
+                ", avaliacao=" + avaliacaoMedia +
+                '}';
     }
 
     // Getters e Setters

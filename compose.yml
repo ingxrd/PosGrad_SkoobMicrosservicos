@@ -1,99 +1,122 @@
-  name: skoob
+name: skoob
 
-  services:
-    config-server:
-      build: ./skoob-config-server
-      ports:
-        - "8888:8888"
-      environment:
-        SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCHLOCATIONS: file:/config-repo
-      healthcheck:
-        test: ["CMD-SHELL", "curl -fs http://localhost:8888/skoob-api/prod > /dev/null || exit 1"]
-        interval: 10s
-        timeout: 5s
-        retries: 10
-        start_period: 20s
-      networks:
-        - skoob-net
+services:
+  config-server:
+    build: ./skoob-config-server
+    ports:
+      - "8888:8888"
+    environment:
+      SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCHLOCATIONS: file:/config-repo
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs http://localhost:8888/skoob-api/prod > /dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    networks:
+      - skoob-net
 
-    mysql-skoob:
-      image: mysql:8.4
-      environment:
-        MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-        MYSQL_DATABASE: skoobdb
-      ports:
-        - "3308:3306"
-      volumes:
-        - mysql-skoob-data:/var/lib/mysql
-      healthcheck:
-        test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
-        interval: 10s
-        timeout: 5s
-        retries: 10
-        start_period: 20s
-      networks:
-        - skoob-net
+  mysql-skoob:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: skoobdb
+    ports:
+      - "3308:3306"
+    volumes:
+      - mysql-skoob-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    networks:
+      - skoob-net
 
-    mysql-registro:
-      image: mysql:8.4
-      environment:
-        MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-        MYSQL_DATABASE: registroleituradb
-      ports:
-        - "3307:3306"
-      volumes:
-        - mysql-registro-data:/var/lib/mysql
-      healthcheck:
-        test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
-        interval: 10s
-        timeout: 5s
-        retries: 10
-        start_period: 20s
-      networks:
-        - skoob-net
+  mysql-registro:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: registroleituradb
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql-registro-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    networks:
+      - skoob-net
 
-    registro-leitura-service:
-      build: ./skoob-registro-leitura-service
-      ports:
-        - "8081:8081"
-      environment:
-        SPRING_PROFILES_ACTIVE: prod
-        CONFIG_SERVER_URL: http://config-server:8888
-        DB_URL: jdbc:mysql://mysql-registro:3306/registroleituradb
-        DB_USERNAME: root
-        DB_PASSWORD: ${DB_PASSWORD}
-      depends_on:
-        config-server:
-          condition: service_healthy
-        mysql-registro:
-          condition: service_healthy
-      networks:
-        - skoob-net
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - skoob-net
 
-    skoob-api:
-      build: ./skoob_api_ingridmunhoz
-      ports:
-        - "8080:8080"
-      environment:
-        SPRING_PROFILES_ACTIVE: prod
-        CONFIG_SERVER_URL: http://config-server:8888
-        DB_URL: jdbc:mysql://mysql-skoob:3306/skoobdb
-        DB_USERNAME: root
-        DB_PASSWORD: ${DB_PASSWORD}
-        REGISTROLEITURA_SERVICE_URL: http://registro-leitura-service:8081
-      depends_on:
-        config-server:
-          condition: service_healthy
-        mysql-skoob:
-          condition: service_healthy
-        registro-leitura-service:
-          condition: service_started
-      networks:
-        - skoob-net
+  registro-leitura-service:
+    build: ./skoob-registro-leitura-service
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      CONFIG_SERVER_URL: http://config-server:8888
+      DB_URL: jdbc:mysql://mysql-registro:3306/registroleituradb
+      DB_USERNAME: root
+      DB_PASSWORD: ${DB_PASSWORD}
+    depends_on:
+      config-server:
+        condition: service_healthy
+      mysql-registro:
+        condition: service_healthy
+    networks:
+      - skoob-net
 
-  volumes:
-    mysql-skoob-data:
-    mysql-registro-data:
+  skoob-api:
+    build: ./skoob_api_ingridmunhoz
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      CONFIG_SERVER_URL: http://config-server:8888
+      DB_URL: jdbc:mysql://mysql-skoob:3306/skoobdb
+      DB_USERNAME: root
+      DB_PASSWORD: ${DB_PASSWORD}
+      REGISTROLEITURA_SERVICE_URL: http://registro-leitura-service:8081
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: ${RABBITMQ_USER}
+      SPRING_RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+    depends_on:
+      config-server:
+        condition: service_healthy
+      mysql-skoob:
+        condition: service_healthy
+      registro-leitura-service:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - skoob-net
 
-  networks:
-    skoob-net:
+volumes:
+  mysql-skoob-data:
+  mysql-registro-data:
+
+networks:
+  skoob-net:

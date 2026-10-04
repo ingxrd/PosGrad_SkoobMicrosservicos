@@ -1,9 +1,10 @@
 package br.edu.infnet.skoob_api_ingridmunhoz.comentario;
 
+import br.edu.infnet.skoob_api_ingridmunhoz.comentario.dto.NotificacaoComentarioDTO;
 import br.edu.infnet.skoob_api_ingridmunhoz.exception.RecursoNaoEncontradoException;
+import br.edu.infnet.skoob_api_ingridmunhoz.livro.Livro;
 import br.edu.infnet.skoob_api_ingridmunhoz.livro.LivroService;
 import br.edu.infnet.skoob_api_ingridmunhoz.usuario.Usuario;
-import br.edu.infnet.skoob_api_ingridmunhoz.livro.Livro;
 import br.edu.infnet.skoob_api_ingridmunhoz.usuario.UsuarioService;
 import org.springframework.stereotype.Service;
 
@@ -15,19 +16,24 @@ public class ComentarioService {
     private final ComentarioRepository comentarioRepository;
     private final UsuarioService usuarioService;
     private final LivroService livroService;
+    private final NotificacaoComentarioProducer producer;
 
     public ComentarioService(ComentarioRepository comentarioRepository,
                              UsuarioService usuarioService,
-                             LivroService livroService) {
+                             LivroService livroService,
+                             NotificacaoComentarioProducer producer) {
         this.comentarioRepository = comentarioRepository;
         this.usuarioService = usuarioService;
         this.livroService = livroService;
+        this.producer = producer;
     }
 
     // CRUD
     public Comentario incluir(Comentario comentario) {
         validarComentario(comentario);
-        return comentarioRepository.save(comentario);
+        Comentario salvo = comentarioRepository.save(comentario);
+        publicarNotificacao(salvo);
+        return salvo;
     }
 
     public Comentario alterar(Comentario comentario) {
@@ -106,5 +112,17 @@ public class ComentarioService {
                 .mapToInt(Comentario::getAvaliacao)
                 .average()
                 .orElse(0.0);
+    }
+
+    // Mensageria — publica notificação depois de salvar
+    private void publicarNotificacao(Comentario salvo) {
+        NotificacaoComentarioDTO dto = new NotificacaoComentarioDTO(
+                salvo.getId(),
+                salvo.getLivro().getId(),
+                salvo.getLivro().getTitulo(),
+                salvo.getUsuario().getId(),
+                salvo.getUsuario().getNome()
+        );
+        producer.publicar(dto);
     }
 }

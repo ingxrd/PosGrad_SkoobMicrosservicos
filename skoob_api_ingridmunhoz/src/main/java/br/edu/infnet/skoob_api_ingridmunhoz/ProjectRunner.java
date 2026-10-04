@@ -11,8 +11,8 @@ import br.edu.infnet.skoob_api_ingridmunhoz.usuario.UsuarioService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Component
 public class ProjectRunner implements CommandLineRunner {
@@ -29,7 +29,9 @@ public class ProjectRunner implements CommandLineRunner {
     private Livro livro2;
     private Livro livro3;
 
-    public ProjectRunner(UsuarioService usuarioService, LivroService livroService,ComentarioService comentarioService) {
+    public ProjectRunner(UsuarioService usuarioService,
+                         LivroService livroService,
+                         ComentarioService comentarioService) {
         this.usuarioService = usuarioService;
         this.livroService = livroService;
         this.comentarioService = comentarioService;
@@ -42,9 +44,6 @@ public class ProjectRunner implements CommandLineRunner {
         System.out.println("INICIANDO SISTEMA SKOOB - ETAPA 4");
         System.out.println("========================================\n");
 
-        // Proteção: se a aplicação já rodou antes e o banco não foi resetado,
-        // a carga inicial pode colidir com dados já persistidos.
-        // Nesse caso, apenas avisamos e seguimos sem interromper a inicialização.
         try {
             criarUsuarios();
             criarLivros();
@@ -53,12 +52,33 @@ public class ProjectRunner implements CommandLineRunner {
             System.out.println("!!! Carga inicial ignorada: dados de exemplo já existem no banco.");
             System.out.println("    Detalhe: " + e.getMessage());
             System.out.println();
+            carregarDadosExistentes();   // ← AJUSTE: repopula as variáveis a partir do banco
         }
 
         executarConsultasComStreams();
         testarExcecoes();
         exibirResultadoFinal();
-        exibirInstrucoesFinais();
+    }
+
+    // ==================== CARGA DE DADOS EXISTENTES (fallback) ====================
+
+    private void carregarDadosExistentes() {
+        System.out.println("--- CARREGANDO DADOS EXISTENTES DO BANCO ---\n");
+
+        List<Usuario> usuarios = usuarioService.obterLista();
+        List<Livro> livros = livroService.obterLista();
+
+        if (usuarios.size() >= 1) usuario1 = usuarios.get(0);
+        if (usuarios.size() >= 2) usuario2 = usuarios.get(1);
+        if (usuarios.size() >= 3) usuario3 = usuarios.get(2);
+
+        if (livros.size() >= 1) livro1 = livros.get(0);
+        if (livros.size() >= 2) livro2 = livros.get(1);
+        if (livros.size() >= 3) livro3 = livros.get(2);
+
+        System.out.println("Usuários carregados: " + usuarios.size());
+        System.out.println("Livros carregados: " + livros.size());
+        System.out.println();
     }
 
     // ==================== CRIAÇÃO DOS DADOS ====================
@@ -110,8 +130,6 @@ public class ProjectRunner implements CommandLineRunner {
         System.out.println(livro3);
         System.out.println();
     }
-
-
 
     private void criarComentarios() {
         Comentario comentario1 = new Comentario(
@@ -192,7 +210,6 @@ public class ProjectRunner implements CommandLineRunner {
                 .forEach(u -> System.out.println("   -> " + u.getNome() + " (" + u.getUsername() + ")"));
         System.out.println();
 
-
         System.out.println("10. COMENTARIOS COM AVALIACAO >= 4 ESTRELAS");
         comentarioService.buscarPorAvaliacaoMinima(4).forEach(c ->
                 System.out.println("   -> Usuário: " + c.getUsuario().getUsername() +
@@ -229,7 +246,7 @@ public class ProjectRunner implements CommandLineRunner {
         System.out.println("TESTE 1: Incluir livro com ISBN duplicado");
         try {
             Livro livroDuplicado = new Livro(
-                    "Livro Duplicado", "Autor Teste", "978-0-547-92934-9", // mesmo ISBN do livro1
+                    "Livro Duplicado", "Autor Teste", "978-0-547-92934-9",
                     "Editora Teste", 100, "Ficção", 4.0, true,
                     "Sinopse de teste..."
             );
@@ -256,7 +273,7 @@ public class ProjectRunner implements CommandLineRunner {
         System.out.println("TESTE 3: Incluir usuário com username/email duplicado");
         try {
             Usuario usuarioDuplicado = new Usuario(
-                    "Duplicado", "ingrid", "ingrid@email.com", "123" // mesmos dados do usuario1
+                    "Duplicado", "ingrid", "ingrid@email.com", "123"
             );
             usuarioService.incluir(usuarioDuplicado);
             System.out.println("   ERRO: Não deveria ter incluído!");
@@ -304,19 +321,35 @@ public class ProjectRunner implements CommandLineRunner {
         System.out.println("========================================\n");
 
         System.out.println("=== USUARIOS COM SEUS DADOS ===");
-        System.out.println(usuario1);
-        System.out.println("  Comentários: " + usuario1.getComentarios().size());
+        if (usuario1 != null) {
+            System.out.println(usuario1);
+            System.out.println("  Comentários: " + comentarioService.buscarPorUsuario(usuario1.getId()).size());
+        } else {
+            System.out.println("(nenhum usuário carregado)");
+        }
         System.out.println();
-        System.out.println(usuario2);
-        System.out.println("  Comentários: " + usuario2.getComentarios().size());
+        if (usuario2 != null) {
+            System.out.println(usuario2);
+            System.out.println("  Comentários: " + comentarioService.buscarPorUsuario(usuario2.getId()).size());
+        } else {
+            System.out.println("(nenhum usuário carregado)");
+        }
         System.out.println();
 
         System.out.println("=== LIVROS COM SEUS DADOS ===");
-        System.out.println(livro1);
-        System.out.println("  Comentários: " + livro1.getComentarios().size());
+        if (livro1 != null) {
+            System.out.println(livro1);
+            System.out.println("  Comentários: " + comentarioService.buscarPorLivro(livro1.getId()).size());
+        } else {
+            System.out.println("(nenhum livro carregado)");
+        }
         System.out.println();
-        System.out.println(livro2);
-        System.out.println("  Comentários: " + livro2.getComentarios().size());
+        if (livro2 != null) {
+            System.out.println(livro2);
+            System.out.println("  Comentários: " + comentarioService.buscarPorLivro(livro2.getId()).size());
+        } else {
+            System.out.println("(nenhum livro carregado)");
+        }
         System.out.println();
 
         System.out.println("=== ESTATISTICAS COM STREAMS ===");
@@ -328,9 +361,4 @@ public class ProjectRunner implements CommandLineRunner {
         System.out.println();
     }
 
-    private void exibirInstrucoesFinais() {
-        System.out.println("========================================");
-        System.out.println("   SKOOB INICIALIZADO COM SUCESSO!");
-        System.out.println("========================================");
-    }
 }

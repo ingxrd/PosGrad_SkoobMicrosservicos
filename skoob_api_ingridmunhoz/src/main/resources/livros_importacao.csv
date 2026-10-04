@@ -1,0 +1,8 @@
+titulo,autor,isbn,editora,paginas,genero,avaliacaoMedia,disponivel,sinopse
+O Hobbit,J.R.R. Tolkien,978-0-547-92822-7,HarperCollins,310,Fantasia,4.7,true,Uma aventura pela Terra Média
+1984,George Orwell,978-85-359-1479-4,Companhia das Letras,416,Distopia,4.9,true,Um clássico sobre vigilância e poder
+A Revolução dos Bichos,George Orwell,978-85-359-1447-3,Companhia das Letras,152,Distopia,4.6,true,Fábula política sobre poder e corrupção
+O Pequeno Príncipe,Antoine de Saint-Exupéry,978-85-325-0038-0,Agir,96,Infantil,4.8,true,Um clássico atemporal sobre amizade
+Cem Anos de Solidão,Gabriel García Márquez,978-85-01-02135-8,Record,432,Realismo Mágico,4.9,false,A saga da família Buendía
+,Anônimo,978-00-0000000-0,Editora X,200,Desconhecido,3.0,true,Registro inválido sem título
+O Alquimista,Paulo Coelho,978-85-325-2636-6,Paralela,208,Ficção,4.3,true,A jornada de Santiago em busca de seu tesouro

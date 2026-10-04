@@ -62,9 +62,12 @@ public class Usuario implements br.edu.infnet.skoob_api_ingridmunhoz.shared.Iden
 
     @Override
     public String toString() {
-        return String.format("Usuario{id=%d, nome='%s', username='%s', email='%s', totalComentarios=%d}",
-                id, nome, username, email,
-                comentarios != null ? comentarios.size() : 0);
+        return "Usuario{" +
+                "id=" + id +
+                ", nome='" + nome + '\'' +
+                ", username='" + username + '\'' +
+                ", email='" + email + '\'' +
+                '}';
     }
 
     public String getNome() { return nome; }
