@@ -2,9 +2,12 @@ package br.edu.infnet.skoob_api_ingridmunhoz.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import br.edu.infnet.skoob_api_ingridmunhoz.registroleitura.exception.RegistroLeituraNaoEncontradoException;
+import br.edu.infnet.skoob_api_ingridmunhoz.registroleitura.exception.RegistroLeituraServiceIndisponivelException;
 
 import java.time.LocalDateTime;
 import java.util.stream.Collectors;
@@ -12,6 +15,17 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(br.edu.infnet.skoob_api_ingridmunhoz.registroleitura.exception.RegistroLeituraNaoEncontradoException.class)
+    public ResponseEntity<ErroResponse> tratarRegistroLeituraNaoEncontrado(
+            br.edu.infnet.skoob_api_ingridmunhoz.registroleitura.exception.RegistroLeituraNaoEncontradoException ex) {
+        return criarResposta(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(br.edu.infnet.skoob_api_ingridmunhoz.registroleitura.exception.RegistroLeituraServiceIndisponivelException.class)
+    public ResponseEntity<ErroResponse> tratarRegistroLeituraServiceIndisponivel(
+            br.edu.infnet.skoob_api_ingridmunhoz.registroleitura.exception.RegistroLeituraServiceIndisponivelException ex) {
+        return criarResposta(HttpStatus.SERVICE_UNAVAILABLE, ex.getMessage());
+    }
 
     // Trata Recurso Não Encontrado → 404 Not Found
     @ExceptionHandler(RecursoNaoEncontradoException.class)
@@ -51,4 +65,10 @@ public class GlobalExceptionHandler {
         );
         return ResponseEntity.status(status).body(erro);
     }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErroResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
+        return criarResposta(HttpStatus.BAD_REQUEST, "JSON inválido ou mal formatado: " + ex.getMostSpecificCause().getMessage());
+    }
+
 }

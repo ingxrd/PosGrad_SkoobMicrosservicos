@@ -4,11 +4,9 @@ import br.edu.infnet.skoob_api_ingridmunhoz.exception.IdentificadorDuplicadoExce
 import br.edu.infnet.skoob_api_ingridmunhoz.exception.RecursoNaoEncontradoException;
 import br.edu.infnet.skoob_api_ingridmunhoz.comentario.Comentario;
 import br.edu.infnet.skoob_api_ingridmunhoz.livro.Livro;
-import br.edu.infnet.skoob_api_ingridmunhoz.registroLeitura.RegistroLeitura;
 import br.edu.infnet.skoob_api_ingridmunhoz.usuario.Usuario;
 import br.edu.infnet.skoob_api_ingridmunhoz.comentario.ComentarioService;
 import br.edu.infnet.skoob_api_ingridmunhoz.livro.LivroService;
-import br.edu.infnet.skoob_api_ingridmunhoz.registroLeitura.RegistroLeituraService;
 import br.edu.infnet.skoob_api_ingridmunhoz.usuario.UsuarioService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -21,7 +19,6 @@ public class ProjectRunner implements CommandLineRunner {
 
     private final UsuarioService usuarioService;
     private final LivroService livroService;
-    private final RegistroLeituraService registroLeituraService;
     private final ComentarioService comentarioService;
 
     private Usuario usuario1;
@@ -32,11 +29,9 @@ public class ProjectRunner implements CommandLineRunner {
     private Livro livro2;
     private Livro livro3;
 
-    public ProjectRunner(UsuarioService usuarioService, LivroService livroService,
-                         RegistroLeituraService registroLeituraService, ComentarioService comentarioService) {
+    public ProjectRunner(UsuarioService usuarioService, LivroService livroService,ComentarioService comentarioService) {
         this.usuarioService = usuarioService;
         this.livroService = livroService;
-        this.registroLeituraService = registroLeituraService;
         this.comentarioService = comentarioService;
     }
 
@@ -53,7 +48,6 @@ public class ProjectRunner implements CommandLineRunner {
         try {
             criarUsuarios();
             criarLivros();
-            criarRegistrosLeitura();
             criarComentarios();
         } catch (IdentificadorDuplicadoException e) {
             System.out.println("!!! Carga inicial ignorada: dados de exemplo já existem no banco.");
@@ -117,47 +111,7 @@ public class ProjectRunner implements CommandLineRunner {
         System.out.println();
     }
 
-    private void criarRegistrosLeitura() {
-        RegistroLeitura registro1 = new RegistroLeitura(
-                "LENDO", 300, 25.0, 0,
-                LocalDate.of(2026, 8, 1), null
-        );
 
-        RegistroLeitura registro2 = new RegistroLeitura(
-                "TERMINADO", 256, 100.0, 5,
-                LocalDate.of(2026, 7, 15), LocalDate.of(2026, 8, 20)
-        );
-
-        RegistroLeitura registro3 = new RegistroLeitura(
-                "LENDO", 50, 35.0, 0,
-                LocalDate.of(2026, 8, 10), null
-        );
-
-        registro1.setUsuario(usuario1);
-        registro1.setLivro(livro1);
-        usuario1.adicionarRegistroLeitura(registro1);
-        livro1.adicionarRegistroLeitura(registro1);
-
-        registro2.setUsuario(usuario1);
-        registro2.setLivro(livro2);
-        usuario1.adicionarRegistroLeitura(registro2);
-        livro2.adicionarRegistroLeitura(registro2);
-
-        registro3.setUsuario(usuario2);
-        registro3.setLivro(livro3);
-        usuario2.adicionarRegistroLeitura(registro3);
-        livro3.adicionarRegistroLeitura(registro3);
-
-        registroLeituraService.incluir(registro1);
-        registroLeituraService.incluir(registro2);
-        registroLeituraService.incluir(registro3);
-
-        System.out.println("--- REGISTROS DE LEITURA CRIADOS E INCLUIDOS ---");
-        System.out.println(registro1);
-        System.out.println(registro2);
-        System.out.println(registro3);
-        System.out.println();
-    }
 
     private void criarComentarios() {
         Comentario comentario1 = new Comentario(
@@ -238,19 +192,6 @@ public class ProjectRunner implements CommandLineRunner {
                 .forEach(u -> System.out.println("   -> " + u.getNome() + " (" + u.getUsername() + ")"));
         System.out.println();
 
-        System.out.println("8. REGISTROS EM ANDAMENTO (progresso < 100%)");
-        registroLeituraService.listarEmAndamento().forEach(r ->
-                System.out.println("   -> Usuário: " + r.getUsuario().getUsername() +
-                        " | Livro: " + r.getLivro().getTitulo() +
-                        " | Progresso: " + r.getPercentualLeitura() + "%"));
-        System.out.println();
-
-        System.out.println("9. REGISTROS FINALIZADOS (status = TERMINADO)");
-        registroLeituraService.listarFinalizados().forEach(r ->
-                System.out.println("   -> Usuário: " + r.getUsuario().getUsername() +
-                        " | Livro: " + r.getLivro().getTitulo() +
-                        " | Avaliação: " + r.getAvaliacaoUsuario()));
-        System.out.println();
 
         System.out.println("10. COMENTARIOS COM AVALIACAO >= 4 ESTRELAS");
         comentarioService.buscarPorAvaliacaoMinima(4).forEach(c ->
@@ -364,28 +305,23 @@ public class ProjectRunner implements CommandLineRunner {
 
         System.out.println("=== USUARIOS COM SEUS DADOS ===");
         System.out.println(usuario1);
-        System.out.println("  Registros: " + usuario1.getRegistrosLeitura().size());
         System.out.println("  Comentários: " + usuario1.getComentarios().size());
         System.out.println();
         System.out.println(usuario2);
-        System.out.println("  Registros: " + usuario2.getRegistrosLeitura().size());
         System.out.println("  Comentários: " + usuario2.getComentarios().size());
         System.out.println();
 
         System.out.println("=== LIVROS COM SEUS DADOS ===");
         System.out.println(livro1);
-        System.out.println("  Registros: " + livro1.getRegistrosLeitura().size());
         System.out.println("  Comentários: " + livro1.getComentarios().size());
         System.out.println();
         System.out.println(livro2);
-        System.out.println("  Registros: " + livro2.getRegistrosLeitura().size());
         System.out.println("  Comentários: " + livro2.getComentarios().size());
         System.out.println();
 
         System.out.println("=== ESTATISTICAS COM STREAMS ===");
         System.out.println("  Total de usuários: " + usuarioService.obterLista().size());
         System.out.println("  Total de livros: " + livroService.obterLista().size());
-        System.out.println("  Total de registros de leitura: " + registroLeituraService.obterLista().size());
         System.out.println("  Total de comentários: " + comentarioService.obterLista().size());
         System.out.println("  Média de páginas dos livros: " + String.format("%.1f", livroService.calcularMediaPaginas()));
         System.out.println("  Média de avaliações dos comentários: " + String.format("%.1f", comentarioService.calcularMediaAvaliacoes()));

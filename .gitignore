@@ -1,0 +1,11 @@
+# Sistema operacional
+.DS_Store
+
+# IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Maven
+target/

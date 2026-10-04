@@ -39,14 +39,13 @@ public class Comentario implements Identificavel {
     // Relacionamentos
     @ManyToOne
     @JoinColumn(name = "usuario_id", nullable = false)
-    @JsonBackReference
+    @JsonBackReference("usuario-comentario")
     private Usuario usuario;
 
     @ManyToOne
     @JoinColumn(name = "livro_id", nullable = false)
-    @JsonBackReference
+    @JsonBackReference("livro-comentario")
     private Livro livro;
-
     // Construtores
     public Comentario() {
     }

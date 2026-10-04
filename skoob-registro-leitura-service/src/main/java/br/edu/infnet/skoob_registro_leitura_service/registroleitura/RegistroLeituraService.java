@@ -1,10 +1,6 @@
-package br.edu.infnet.skoob_api_ingridmunhoz.registroLeitura;
+package br.edu.infnet.skoob_registro_leitura_service.registroleitura;
 
-import br.edu.infnet.skoob_api_ingridmunhoz.exception.RecursoNaoEncontradoException;
-import br.edu.infnet.skoob_api_ingridmunhoz.livro.LivroService;
-import br.edu.infnet.skoob_api_ingridmunhoz.usuario.Usuario;
-import br.edu.infnet.skoob_api_ingridmunhoz.livro.Livro;
-import br.edu.infnet.skoob_api_ingridmunhoz.usuario.UsuarioService;
+import br.edu.infnet.skoob_registro_leitura_service.exception.RecursoNaoEncontradoException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,15 +9,9 @@ import java.util.List;
 public class RegistroLeituraService {
 
     private final RegistroLeituraRepository registroRepository;
-    private final UsuarioService usuarioService;
-    private final LivroService livroService;
 
-    public RegistroLeituraService(RegistroLeituraRepository registroRepository,
-                                  UsuarioService usuarioService,
-                                  LivroService livroService) {
+    public RegistroLeituraService(RegistroLeituraRepository registroRepository) {
         this.registroRepository = registroRepository;
-        this.usuarioService = usuarioService;
-        this.livroService = livroService;
     }
 
     // CRUD
@@ -51,24 +41,15 @@ public class RegistroLeituraService {
         return registroRepository.findAll();
     }
 
-    // Validações
     private void validarRegistro(RegistroLeitura registro) {
         if (registro == null) {
             throw new IllegalArgumentException("Registro não pode ser nulo!");
         }
-
-        // Verifica se o usuário existe
-        if (registro.getUsuario() != null && registro.getUsuario().getId() != null) {
-            Long usuarioId = registro.getUsuario().getId();
-            Usuario usuario = usuarioService.obterPorId(usuarioId);
-            registro.setUsuario(usuario);
+        if (registro.getUsuarioId() == null) {
+            throw new IllegalArgumentException("O usuário é obrigatório!");
         }
-
-        // Verifica se o livro existe
-        if (registro.getLivro() != null && registro.getLivro().getId() != null) {
-            Long livroId = registro.getLivro().getId();
-            Livro livro = livroService.obterPorId(livroId);
-            registro.setLivro(livro);
+        if (registro.getLivroId() == null) {
+            throw new IllegalArgumentException("O livro é obrigatório!");
         }
     }
 
@@ -84,12 +65,10 @@ public class RegistroLeituraService {
 
     // Consultas
     public List<RegistroLeitura> buscarPorUsuario(Long usuarioId) {
-        usuarioService.obterPorId(usuarioId);
         return registroRepository.findByUsuarioId(usuarioId);
     }
 
     public List<RegistroLeitura> buscarPorLivro(Long livroId) {
-        livroService.obterPorId(livroId);
         return registroRepository.findByLivroId(livroId);
     }
 

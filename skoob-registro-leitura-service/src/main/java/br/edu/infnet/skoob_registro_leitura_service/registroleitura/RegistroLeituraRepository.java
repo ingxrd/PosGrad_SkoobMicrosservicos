@@ -1,4 +1,4 @@
-package br.edu.infnet.skoob_api_ingridmunhoz.registroLeitura;
+package br.edu.infnet.skoob_registro_leitura_service.registroleitura;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

@@ -2,7 +2,6 @@ package br.edu.infnet.skoob_api_ingridmunhoz.livro;
 
 import br.edu.infnet.skoob_api_ingridmunhoz.comentario.Comentario;
 import br.edu.infnet.skoob_api_ingridmunhoz.shared.Identificavel;
-import br.edu.infnet.skoob_api_ingridmunhoz.registroLeitura.RegistroLeitura;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
@@ -48,13 +47,8 @@ public class Livro implements Identificavel {
     @Column(length = 1000)
     private String sinopse;
 
-    // Relacionamentos
     @OneToMany(mappedBy = "livro", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
-    private List<RegistroLeitura> registrosLeitura = new ArrayList<>();
-
-    @OneToMany(mappedBy = "livro", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
+    @JsonManagedReference("livro-comentario")
     private List<Comentario> comentarios = new ArrayList<>();
 
     // Construtores
@@ -72,12 +66,6 @@ public class Livro implements Identificavel {
         this.avaliacaoMedia = avaliacaoMedia;
         this.disponivel = disponivel;
         this.sinopse = sinopse;
-    }
-
-    // Métodos de Associação
-    public void adicionarRegistroLeitura(RegistroLeitura registro) {
-        registrosLeitura.add(registro);
-        registro.setLivro(this);
     }
 
     public void adicionarComentario(Comentario comentario) {
@@ -127,11 +115,6 @@ public class Livro implements Identificavel {
 
     public String getSinopse() { return sinopse; }
     public void setSinopse(String sinopse) { this.sinopse = sinopse; }
-
-    public List<RegistroLeitura> getRegistrosLeitura() { return registrosLeitura; }
-    public void setRegistrosLeitura(List<RegistroLeitura> registrosLeitura) {
-        this.registrosLeitura = registrosLeitura;
-    }
 
     public List<Comentario> getComentarios() { return Collections.unmodifiableList(comentarios); } //melhora o encapsulamento
 
